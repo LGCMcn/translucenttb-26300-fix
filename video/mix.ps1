@@ -2,11 +2,11 @@ $ErrorActionPreference = 'Stop'
 $root  = 'C:\Users\35315\ttb-publish'
 $media = Join-Path $root 'media'
 $voice = Join-Path $media 'voice'
-$work  = Join-Path $env:TEMP 'ttb_audio2'
+$work  = Join-Path $env:TEMP 'ttb_audio3'
 New-Item -ItemType Directory -Force -Path $work | Out-Null
 
 # ---------------------------------------------------------------- 1. bed
-# Apple-ish: very low sine stack + airy high shimmer, breathing LFO, soft space.
+# clean low bed + airy shimmer, breathing LFO, soft space
 $bgm = Join-Path $work 'bgm.wav'
 & ffmpeg -y -v error `
   -f lavfi -i "sine=f=55:d=106" `
@@ -17,31 +17,38 @@ $bgm = Join-Path $work 'bgm.wav'
   -ar 48000 -ac 2 $bgm
 Write-Host "bed ok"
 
-# ---------------------------------------------------------------- 2. transition air
-$whoosh = Join-Path $work 'air.wav'
+# ---------------------------------------------------------------- 2. airy transition
+$air = Join-Path $work 'air.wav'
 & ffmpeg -y -v error -f lavfi -i "anoisesrc=d=0.9:c=pink:a=0.5" -af `
-  "bandpass=f=1100:width_type=o:w=2.2,highpass=f=280,lowpass=f=5200,volume=0.30,afade=t=in:st=0:d=0.45:curve=qsin,afade=t=out:st=0.45:d=0.45:curve=qsin,aecho=0.7:0.6:75:0.28" `
-  -ar 48000 -ac 2 $whoosh
+  "bandpass=f=1100:width_type=o:w=2.4,highpass=f=280,lowpass=f=5200,volume=0.30,afade=t=in:st=0:d=0.42:curve=qsin,afade=t=out:st=0.48:d=0.42:curve=qsin,aecho=0.7:0.6:75:0.28" `
+  -ar 48000 -ac 2 $air
 Write-Host "air ok"
 
-# ---------------------------------------------------------------- 3. soft tick
+# ---------------------------------------------------------------- 3. bouncy tick (chirp down)
 $tick = Join-Path $work 'tick.wav'
-& ffmpeg -y -v error -f lavfi -i "sine=f=1600:d=0.07" -af `
-  "volume=0.45,afade=t=out:st=0.004:d=0.065:curve=exp,aecho=0.6:0.5:45:0.18" `
+& ffmpeg -y -v error -f lavfi -i "aevalsrc=0.55*sin(2*PI*(1900*t-9500*t*t)):s=48000:d=0.11" -af `
+  "afade=t=out:st=0.012:d=0.098:curve=exp,aecho=0.55:0.45:38:0.25" `
   -ar 48000 -ac 2 $tick
 Write-Host "tick ok"
 
-# ---------------------------------------------------------------- 4. glass hit
-$glass = Join-Path $work 'glass.wav'
-& ffmpeg -y -v error -f lavfi -i "sine=f=2093:d=0.28" -f lavfi -i "sine=f=2637:d=0.28" -filter_complex `
-  "[0:a]volume=0.30[g0];[1:a]volume=0.18[g1];[g0][g1]amix=inputs=2:normalize=0,afade=t=out:st=0.02:d=0.26:curve=exp,aecho=0.7:0.6:110:0.25" `
-  -ar 48000 -ac 2 $glass
-Write-Host "glass ok"
+# ---------------------------------------------------------------- 4. bloop (elastic drop) - the "Q" sound
+$bloop = Join-Path $work 'bloop.wav'
+& ffmpeg -y -v error -f lavfi -i "aevalsrc=0.65*sin(2*PI*(540*t-620*t*t)):s=48000:d=0.34" -af `
+  "lowpass=f=2600,afade=t=out:st=0.02:d=0.32:curve=exp,aecho=0.6:0.5:70:0.30" `
+  -ar 48000 -ac 2 $bloop
+Write-Host "bloop ok"
 
-# ---------------------------------------------------------------- 5. low thump
+# ---------------------------------------------------------------- 5. pop (elastic rise)
+$pop = Join-Path $work 'pop.wav'
+& ffmpeg -y -v error -f lavfi -i "aevalsrc=0.6*sin(2*PI*(210*t+1300*t*t)):s=48000:d=0.20" -af `
+  "lowpass=f=3800,afade=t=out:st=0.015:d=0.185:curve=exp,aecho=0.55:0.45:55:0.22" `
+  -ar 48000 -ac 2 $pop
+Write-Host "pop ok"
+
+# ---------------------------------------------------------------- 6. low thump
 $thump = Join-Path $work 'thump.wav'
-& ffmpeg -y -v error -f lavfi -i "sine=f=62:d=0.5" -af `
-  "volume=0.75,lowpass=f=140,afade=t=out:st=0.02:d=0.45:curve=exp" `
+& ffmpeg -y -v error -f lavfi -i "sine=f=64:d=0.45" -af `
+  "volume=0.8,lowpass=f=150,afade=t=out:st=0.015:d=0.43:curve=exp" `
   -ar 48000 -ac 2 $thump
 Write-Host "thump ok"
 
@@ -57,16 +64,16 @@ $voiceStarts = @(
     @{ f = 's8.mp3'; t = 93.60 }
 )
 $airAt   = @(4.05, 19.25, 36.85, 52.75, 77.95, 86.15, 92.95)
-$tickAt  = @(53.35, 54.50, 55.70, 56.85, 78.60, 79.60)
-$glassAt = @(0.35, 90.40)
+$tickAt  = @(78.60, 79.60)
+$bloopAt = @(53.35, 54.50, 55.70, 56.85, 90.40)
+$popAt   = @(0.35)
 $thumpAt = @(0.35, 93.20)
 
 # ---------------------------------------------------------------- graph
 $videoIn = Join-Path $media '_video-src.mp4'
-$args = @('-y','-v','error','-i', $videoIn,
-          '-i',$bgm,'-i',$whoosh,'-i',$tick,'-i',$glass,'-i',$thump)
+$args = @('-y','-v','error','-i', $videoIn, '-i',$bgm,'-i',$air,'-i',$tick,'-i',$bloop,'-i',$pop,'-i',$thump)
 $filter = @()
-$idx = 6
+$idx = 7
 foreach ($v in $voiceStarts) {
     $args += @('-i', (Join-Path $voice $v.f))
     $ms = [int]($v.t * 1000)
@@ -75,7 +82,7 @@ foreach ($v in $voiceStarts) {
 }
 $nVoice = $idx - 1
 
-function Add-Instances([string]$inLabel, [int]$inputIndex, [double[]]$times, [double]$vol, [string]$tag) {
+function Add-Instances([int]$inputIndex, [double[]]$times, [double]$vol, [string]$tag) {
     if ($times.Count -eq 0) { return @() }
     $script:filter += ("[{0}:a]asplit={1}" -f $inputIndex, $times.Count) + (($times | ForEach-Object -Begin { $k = 0 } -Process { "[${tag}s$k]"; $k++ }) -join '')
     $outs = @()
@@ -89,21 +96,21 @@ function Add-Instances([string]$inLabel, [int]$inputIndex, [double[]]$times, [do
     return $outs
 }
 
-$airOuts   = Add-Instances 'air'   2 $airAt   1.10 'a'
-$tickOuts  = Add-Instances 'tick'  3 $tickAt  0.24 't'
-$glassOuts = Add-Instances 'glass' 4 $glassAt 0.20 'g'
-$thumpOuts = Add-Instances 'thump' 5 $thumpAt 0.34 'h'
+$airOuts   = Add-Instances 2 $airAt   0.95 'a'
+$tickOuts  = Add-Instances 3 $tickAt  0.36 't'
+$bloopOuts = Add-Instances 4 $bloopAt 0.60 'b'
+$popOuts   = Add-Instances 5 $popAt   0.55 'p'
+$thumpOuts = Add-Instances 6 $thumpAt 0.32 'h'
 
-$voiceStreams = (0..($nVoice - 6) | ForEach-Object { "[v$($_ + 6)]" }) -join ''
-$filter += "[1:a]volume=0.13[bg]"
+$voiceStreams = (0..($nVoice - 7) | ForEach-Object { "[v$($_ + 7)]" }) -join ''
+$filter += "[1:a]volume=0.12[bg]"
 
-$mix = "[bg]" + $voiceStreams + ($airOuts -join '') + ($tickOuts -join '') + ($glassOuts -join '') + ($thumpOuts -join '')
-$nInputs = 1 + ($nVoice - 5) + $airAt.Count + $tickAt.Count + $glassAt.Count + $thumpAt.Count
+$mix = "[bg]" + $voiceStreams + ($airOuts -join '') + ($tickOuts -join '') + ($bloopOuts -join '') + ($popOuts -join '') + ($thumpOuts -join '')
+$nInputs = 1 + ($nVoice - 6) + $airAt.Count + $tickAt.Count + $bloopAt.Count + $popAt.Count + $thumpAt.Count
 $filter += ($mix + ("amix=inputs={0}:normalize=0:duration=longest,loudnorm=I=-16:TP=-1.5:LRA=11[aout]" -f $nInputs))
 
 $graph = $filter -join ';'
-$filterFile = Join-Path $work 'filter.txt'
-[System.IO.File]::WriteAllText($filterFile, $graph, (New-Object System.Text.UTF8Encoding($false)))
+[System.IO.File]::WriteAllText((Join-Path $work 'filter.txt'), $graph, (New-Object System.Text.UTF8Encoding($false)))
 
 $out = Join-Path $media 'ttb-26300-fix.mp4'
 $args += @('-filter_complex', $graph, '-map','0:v','-map','[aout]','-c:v','copy',

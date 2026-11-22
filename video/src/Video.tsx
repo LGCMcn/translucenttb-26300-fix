@@ -34,20 +34,41 @@ const Fade: React.FC<{
   fadeIn?: number;
   fadeOut?: number;
   style?: React.CSSProperties;
-}> = ({ children, durationInFrames, fadeIn = 15, fadeOut = 15, style }) => {
+}> = ({ children, durationInFrames, fadeIn = 16, fadeOut = 14, style }) => {
   const frame = useCurrentFrame();
+  // Apple-ish scene change: no sliding, just a focused dissolve (scale + blur + opacity)
   const opacity = interpolate(
     frame,
     [0, fadeIn, durationInFrames - fadeOut, durationInFrames],
     [0, 1, 1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
-  const y = interpolate(frame, [0, fadeIn], [24, 0], {
+  const scale = interpolate(frame, [0, fadeIn], [1.035, 1], {
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.cubic),
   });
+  const exitScale = interpolate(frame, [durationInFrames - fadeOut, durationInFrames], [1, 0.985], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.in(Easing.cubic),
+  });
+  const blur = interpolate(frame, [0, fadeIn], [7, 0], {
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.quad),
+  });
+  const exitBlur = interpolate(frame, [durationInFrames - fadeOut, durationInFrames], [0, 5], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
   return (
-    <AbsoluteFill style={{ opacity, transform: `translateY(${y}px)`, ...style }}>
+    <AbsoluteFill
+      style={{
+        opacity,
+        transform: `scale(${scale * exitScale})`,
+        filter: `blur(${Math.max(blur, exitBlur)}px)`,
+        ...style,
+      }}
+    >
       {children}
     </AbsoluteFill>
   );
@@ -173,7 +194,7 @@ const SymptomRow: React.FC<{ label: string; value: string; ok?: boolean; delay: 
         background: "rgba(255,255,255,0.035)",
         border: "1px solid rgba(255,255,255,0.07)",
         opacity: s,
-        transform: `translateX(${interpolate(s, [0, 1], [-40, 0])}px)`,
+        transform: `translateX(${interpolate(s, [0, 1], [-10, 0])}px) scale(${interpolate(s, [0, 1], [0.985, 1])})`,
       }}
     >
       <span style={{ fontSize: 34, color: theme.dim, fontFamily: fontSans }}>{label}</span>
@@ -229,7 +250,7 @@ const CheckItem: React.FC<{ text: string; ok: boolean; delay: number; note?: str
         gap: 22,
         width: 1160,
         opacity: s,
-        transform: `translateY(${interpolate(s, [0, 1], [22, 0])}px)`,
+        transform: `translateY(${interpolate(s, [0, 1], [9, 0])}px) scale(${interpolate(s, [0, 1], [0.99, 1])})`,
       }}
     >
       <div
@@ -311,7 +332,7 @@ const SceneRootCause: React.FC = () => {
             display: "flex",
             gap: 30,
             opacity: s1,
-            transform: `translateY(${interpolate(s1, [0, 1], [20, 0])}px)`,
+            transform: `translateY(${interpolate(s1, [0, 1], [8, 0])}px) scale(${interpolate(s1, [0, 1], [0.99, 1])})`,
           }}
         >
           <div
@@ -384,7 +405,7 @@ const StepCard: React.FC<{
         background: highlight ? "rgba(255,200,87,0.06)" : "rgba(255,255,255,0.035)",
         border: `1px solid ${highlight ? `${theme.yellow}55` : "rgba(255,255,255,0.08)"}`,
         opacity: s,
-        transform: `translateX(${interpolate(s, [0, 1], [-50, 0])}px)`,
+        transform: `translateX(${interpolate(s, [0, 1], [-12, 0])}px) scale(${interpolate(s, [0, 1], [0.985, 1])})`,
       }}
     >
       <div
@@ -650,10 +671,19 @@ const SceneOutro: React.FC = () => {
 /* ------------------------------------------------------------------ master */
 
 export const TTBFixVideo: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+  // very slow push-in, like a keynote slide hold
+  const zoom = interpolate(frame, [0, durationInFrames], [1.015, 1.0], {
+    extrapolateRight: "clamp",
+  });
   return (
     <AbsoluteFill style={{ backgroundColor: theme.bg }}>
+      <AbsoluteFill style={{ transform: `scale(${zoom})` }}>
       <Sequence from={0} durationInFrames={129} name="Title">
-        <SceneTitle />
+        <Fade durationInFrames={129} fadeIn={12} fadeOut={12}>
+          <SceneTitle />
+        </Fade>
       </Sequence>
       <Sequence from={129} durationInFrames={456} name="Symptom">
         <Fade durationInFrames={456}>
@@ -686,8 +716,11 @@ export const TTBFixVideo: React.FC = () => {
         </Fade>
       </Sequence>
       <Sequence from={2796} durationInFrames={288} name="Outro">
-        <SceneOutro />
+        <Fade durationInFrames={288} fadeIn={14} fadeOut={18}>
+          <SceneOutro />
+        </Fade>
       </Sequence>
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };
