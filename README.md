@@ -1,72 +1,117 @@
-# TranslucentTB 更新系统后任务栏不透明 —— 已定位并修复（Windows 26H2 / build 26300）
+# TranslucentTB 更新后任务栏不透明 · 已定位并修复（Windows 26H2 build 26300.10075）
 
-> 实测机器：Windows 10 Pro 26H2，TranslucentTB 2026.2.0
-> 结论：**回滚出问题的累积更新 KB5132057 后，TranslucentTB 恢复正常接管任务栏（已在本机验证通过）。**
+# TranslucentTB taskbar transparency broke after a Windows update · root cause + verified fix (Windows 26H2 build 26300.10075)
 
-| 文件 | 用途 |
-|---|---|
-| `Fix-RollbackUpdate.ps1` | **一键修复**：定位并卸载出问题的累积更新，重启后自动验证 |
-| `Repair-TranslucentTB.ps1` | 一键诊断/无损修复（自启、配置、注入、透明设置）+ 效果自检 |
-| `Test-TaskbarAccent.ps1` | 效果自检：用"刺眼洋红"判定 TBTB 到底有没有在给任务栏上色 |
-| `Verify-AfterReboot.ps1` | 重启后一次性验证，结果写到桌面 `TBTB-verification.txt` |
-| [`REPORT.md`](REPORT.md) | 完整排查报告（含全部证据、对照实验、结论） |
+> **中文**：装完 `KB5132057`（build 26300.10075）后，TranslucentTB 2026.2.0 完全失效 —— 进程在、配置对、`ExplorerTAP.dll` 也注入进去了，但任务栏永远不透明。**回滚这版更新、重启，立刻恢复**（本机已实测）。
+>
+> **English**: After installing KB5132057 (build 26300.10075), TranslucentTB 2026.2.0 stops working entirely — process alive, config correct, `ExplorerTAP.dll` injected, yet the taskbar is never styled. **Rolling back that cumulative update and rebooting fixes it** (verified on the machine).
 
-## 一键修复
+配套视频（Remotion 制作，可直接投 B 站）：`media/ttb-26300-fix.mp4` · 投稿文案见 [`BILIBILI-POST.md`](BILIBILI-POST.md)
+
+---
+
+## TL;DR
 
 ```powershell
-# 卸载最新一个累积更新（脚本会自己提权）
-powershell -ExecutionPolicy Bypass -File .\Fix-RollbackUpdate.ps1 -Latest
+# 管理员 PowerShell，在本仓库目录执行
+powershell -ExecutionPolicy Bypass -File .\Fix-RollbackUpdate.ps1 -Latest   # 卸载出问题的累积更新
+Restart-Computer                                                            # 重启（DISM 退出码 3010 = 成功，需重启）
+```
 
-# 或者指定包名
+---
+
+## 1. 症状 / Symptom
+
+| 中文 | English |
+|---|---|
+| 任务栏恢复成系统默认的不透明深色 | The taskbar falls back to the stock opaque look |
+| TBTB 托盘图标在、进程正常、`StartupTask` 已启用 | Tray icon present, process healthy, `StartupTask` enabled |
+| 配置仍是 `accent: "clear"`，但改什么都没反应 | Config still says `accent: "clear"`, yet nothing changes |
+| 重启 TBTB / 重启 explorer / 重置包 → 全无效 | Restarting TBTB / explorer, resetting the package → no effect |
+
+## 2. 根因 / Root cause
+
+| 中文 | English |
+|---|---|
+| 不是配置、不是自启、不是透明效果被关、不是包损坏；`SFC` / `DISM` 都判系统健康 | Not config, not autostart, not the transparency toggle, not a broken package; SFC and DISM report a healthy image |
+| `ExplorerTAP.dll` 已注入 explorer，WinEvent 钩子也在工作 | `ExplorerTAP.dll` is injected into explorer and WinEvent hooks do fire |
+| 但 trace 日志里**从来没有**"把任务栏插入 monitor / 下发外观"这一步 | But the trace log **never** shows a taskbar being inserted or an appearance being applied |
+| 对照组：手工 `SetWindowCompositionAttribute` 给 `Shell_TrayWnd` 上洋红 → 任务栏**会**变色（46,48,48 → 73,51,75） | Control test: calling `SetWindowCompositionAttribute` on `Shell_TrayWnd` ourselves **does** change it (46,48,48 → 73,51,75) |
+| 结论：**这一版 shell 不再和 TBTB 的接管层对话**，用户态绕不过去 | Conclusion: **this shell build no longer talks to TBTB's hook layer**; it cannot be worked around from userland |
+
+## 3. 一键修复 / One-click fix
+
+**中文**
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\Fix-RollbackUpdate.ps1 -Latest
+# 或指定包名
 powershell -ExecutionPolicy Bypass -File .\Fix-RollbackUpdate.ps1 `
     -PackageName 'Package_for_RollupFix~31bf3856ad364e35~amd64~~26100.10075.1.25'
-
-# 只在确认问题后想自动重启时加 -Restart
+# 想让它卸载完自动重启，加 -Restart
 ```
 
-脚本行为：`DISM /Remove-Package /NoRestart` → 需要重启时会注册一个"登录时一次性验证"任务 → 你重启 → 桌面生成 `TBTB-verification.txt`（`VERDICT: FIXED` 即成功）。
+**English**
 
-## 环境与结果
+```powershell
+powershell -ExecutionPolicy Bypass -File .\Fix-RollbackUpdate.ps1 -Latest
+# or specify the package explicitly
+powershell -ExecutionPolicy Bypass -File .\Fix-RollbackUpdate.ps1 `
+    -PackageName 'Package_for_RollupFix~31bf3856ad364e35~amd64~~26100.10075.1.25'
+# add -Restart to reboot automatically after removal
+```
 
-| | 修复前 | 修复后 |
+不想用脚本 / Prefer raw commands:
+
+```powershell
+dism /online /remove-package /packagename:"Package_for_RollupFix~31bf3856ad364e35~amd64~~26100.10075.1.25" /norestart
+# 3010 = success, reboot required
+```
+
+## 4. 怎么用（视频里也讲了）/ How to use (also covered in the video)
+
+| # | 中文 | English |
 |---|---|---|
-| 系统 | Windows 10 Pro 26H2，build **26300.10075** | Windows 10 Pro 26H2，build **26300.9974** |
-| 累积更新 | `Package_for_RollupFix~…~26100.10075.1.25`（KB5132057） | 已卸载，回退到 `…26100.9974.1.23` |
-| TranslucentTB | 2026.2.0（`28017CharlesMilette.TranslucentTB_2026.2.0.0_x64__v826wp6bftszj`） | 同左 |
-| 任务栏 | 不透明深色，改配置无任何反应（自检 delta = **0**） | 透明，自检 delta = **114** |
-| 自检结论 | `RESULT: FAIL` | `RESULT: PASS` |
+| 1 | 打开本仓库，`Code → Download ZIP`（或 `git clone`） | Open this repo, `Code → Download ZIP` (or `git clone`) |
+| 2 | **整包解压**到一个文件夹，不要只拖出单个脚本（脚本之间会互相调用） | **Extract the whole folder** — the scripts call each other |
+| 3 | 右键 `Fix-RollbackUpdate.ps1` → **使用 PowerShell 运行**（脚本自己提权；窗口别关，卸载要 10–30 分钟） | Right-click `Fix-RollbackUpdate.ps1` → **Run with PowerShell** (self-elevates; keep the window open, removal takes 10–30 min) |
+| 4 | 完成后重启；桌面出现 `TBTB-verification.txt`，最后一行 `VERDICT: FIXED` 就成功了 | Reboot; `TBTB-verification.txt` appears on the Desktop — `VERDICT: FIXED` means success |
+| 5 | 如果显示 `STILL BROKEN`：跑 `Test-TaskbarAccent.ps1` 自检，把输出贴到 issue | If it says `STILL BROKEN`: run `Test-TaskbarAccent.ps1` and attach the output to an issue |
 
-## 症状
+> 脚本只**卸载更新**，不改任何个性化设置：会先尝试建系统还原点（建不了就跳过），并注册一次性"登录后验证"任务，验证完自删。
+>
+> The scripts only remove the update. They try to create a restore point first (skipped if unavailable) and register a one-shot logon verification task that deletes itself afterwards.
 
-更新系统并重启后，任务栏回到系统默认深色不透明；TranslucentTB 托盘图标在、进程正常、配置还是 `clear`，但怎么都不生效。重启 TBTB、重启 explorer、重置包都无效。
+## 5. 验证数据 / Verification
 
-## 根因
+| | 修复前 / Before | 修复后 / After |
+|---|---|---|
+| 系统 / OS build | 26H2 **26300.10075** | 26H2 **26300.9974** |
+| 洋红自检色差 / magenta self-test delta | **0**（`RESULT: FAIL`） | **114**（`RESULT: PASS`） |
+| 任务栏 / taskbar | 不透明深色 / opaque | 透明，像素 73,83,98 ≈ 壁纸 95,84,96 |
 
-不是配置、不是自启、不是透明效果被关、不是包损坏、也不是系统文件损坏（`SFC`/`DISM` 都判健康）。
+自检原理：把 `desktop_appearance` 临时改成不透明洋红 `#FFFF00FF`，重启 TBTB，比对任务栏像素平均色；`delta = 0` 说明它压根没接管。
 
-- TBTB 进程、`StartupTask`、配置读写、`ExplorerTAP.dll` 注入 explorer **全部正常**；
-- TBTB 的 trace 日志里只看到窗口/任务栏事件，**没有任何一次"把任务栏插入 monitor / 下发外观"**；
-- 对照组：自己调 `user32!SetWindowCompositionAttribute` 给 `Shell_TrayWnd` 上洋红，任务栏**会**变色（46,48,48 → 73,51,75），说明系统合成/accent 通道没坏；
-- 也就是说：**26300.10075 这一版 shell 已经不再和 TBTB 的接管层对话了**，用户态怎么修都没用。
+How the self-test works: temporarily set `desktop_appearance` to opaque magenta, restart TBTB, compare average taskbar pixels. `delta = 0` means nothing is being applied.
 
-卸载这一版累积更新、回到 `26100.9974` 后，同一条链路立刻恢复（自检 delta 从 0 变成 114，任务栏恢复透明）。
+## 6. 文件 / Files
 
-> 注：修复前曾观察到 `explorer.exe 10.0.26100.1710` / `Taskbar.dll 10.0.10011.16384` 与系统版本不一致，但 `System32` 与 `WinSxS` 里的同名文件 **SHA256 完全相同**，属于按路径读取版本号的假象，不能作为“文件损坏”的依据（详见 `REPORT.md` 3.5 节）。
+| 文件 / File | 用途 / Purpose |
+|---|---|
+| `Fix-RollbackUpdate.ps1` | 一键卸载出问题的累积更新 / one-click cumulative-update rollback |
+| `Test-TaskbarAccent.ps1` | 洋红自检：判断 TBTB 是否真的在给任务栏上色 / magenta paint self-test |
+| `Verify-AfterReboot.ps1` | 重启后一次性验证，结果写桌面 / post-reboot verification |
+| `Repair-TranslucentTB.ps1` | 诊断 + 无损修复（自启/配置/注入/透明设置）/ diagnose + non-destructive repairs |
+| `REPORT.md` | 完整排查报告（全部证据、对照实验）/ full investigation report |
+| `GITHUB-PUBLISH.md` | 发布材料（Release notes、issue 模板）/ release notes + issue template |
+| `BILIBILI-POST.md` | B 站投稿文案（标题/简介/标签/封面）/ Bilibili upload copy |
+| `video/` `media/` | Remotion 源码与成片 / Remotion project and rendered video |
 
-## 自检是怎么判定的
+## 7. 注意 / Notes
 
-把 `desktop_appearance` 临时改成不透明洋红 `#FFFF00FF`，重启 TBTB，然后抓任务栏像素平均色和基线比：
-
-```
-baseline RGB = 79,84,102     <- 修复后：透明任务栏，透出壁纸
-test     RGB = 48,50,53      <- 洋红配置生效，任务栏被改写
-delta        = 114           -> PASS
-```
-
-修复前同样的流程 `delta = 0`（一点没变）。自检结束会自动还原原配置并重启 TBTB。
-
-## 后续建议
-
-- 这个 build 的累积更新暂时别装；等 TBTB 发布适配版本，或等微软修复 shell 后再装。
-- 想反馈上游：把 `REPORT.md` + `TBTB-verification.txt` + `%LOCALAPPDATA%\Packages\28017CharlesMilette.TranslucentTB_v826wp6bftszj\TempState\*.log` 一起提到
-  <https://github.com/TranslucentTB/TranslucentTB/issues>。
+- 这个 build 的累积更新**装回去就会复发**；在 TBTB 适配或微软修复前建议暂停更新。
+  Reinstalling that update brings the bug back — pause updates until TBTB or Microsoft ships a fix.
+- 回滚系统更新属于系统维护操作，动手前请先备份重要数据。
+  Rolling back a cumulative update is system maintenance — back up your data first.
+- 本仓库与 TranslucentTB 官方无关，仅为实测复现与临时解决方案。
+  Not affiliated with the TranslucentTB project; this is a reproduction and a stop-gap fix.

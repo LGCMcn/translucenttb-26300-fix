@@ -65,7 +65,10 @@ const Grid: React.FC = () => (
   />
 );
 
-const Backdrop: React.FC<{ tint?: string }> = ({ tint = theme.cyan }) => {
+const Backdrop: React.FC<{ tint?: string; children?: React.ReactNode }> = ({
+  tint = theme.cyan,
+  children,
+}) => {
   const frame = useCurrentFrame();
   const drift = Math.sin(frame / 90) * 60;
   return (
@@ -77,6 +80,7 @@ const Backdrop: React.FC<{ tint?: string }> = ({ tint = theme.cyan }) => {
         }}
       />
       <Grid />
+      {children}
     </AbsoluteFill>
   );
 };
@@ -355,6 +359,116 @@ const SceneRootCause: React.FC = () => {
   );
 };
 
+/* ------------------------------------------------------------------ scene: usage */
+
+const StepCard: React.FC<{
+  n: number;
+  title: string;
+  desc: string;
+  delay: number;
+  highlight?: boolean;
+}> = ({ n, title, desc, delay, highlight }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const s = spring({ frame: frame - delay, fps, config: { damping: 200, mass: 0.7 } });
+  const color = highlight ? theme.yellow : theme.cyan;
+  return (
+    <div
+      style={{
+        width: 1330,
+        display: "flex",
+        alignItems: "center",
+        gap: 28,
+        padding: "24px 34px",
+        borderRadius: 20,
+        background: highlight ? "rgba(255,200,87,0.06)" : "rgba(255,255,255,0.035)",
+        border: `1px solid ${highlight ? `${theme.yellow}55` : "rgba(255,255,255,0.08)"}`,
+        opacity: s,
+        transform: `translateX(${interpolate(s, [0, 1], [-50, 0])}px)`,
+      }}
+    >
+      <div
+        style={{
+          width: 64,
+          height: 64,
+          flexShrink: 0,
+          borderRadius: 18,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 34,
+          fontWeight: 800,
+          fontFamily: fontSans,
+          color,
+          background: `${color}18`,
+          border: `1px solid ${color}55`,
+        }}
+      >
+        {n}
+      </div>
+      <div>
+        <div style={{ fontSize: 34, color: theme.fg, fontFamily: fontSans, fontWeight: 700 }}>
+          {title}
+        </div>
+        <div style={{ marginTop: 6, fontSize: 26, color: theme.dim, fontFamily: fontSans }}>
+          {desc}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SceneUsage: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const s = spring({ frame: frame - 280, fps, config: { damping: 200 } });
+  return (
+    <Backdrop tint={theme.yellow}>
+      <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", gap: 18 }}>
+        <Badge text="怎么用 · 全程 2 分钟" color={theme.yellow} />
+        <div style={{ height: 8 }} />
+        <StepCard
+          n={1}
+          title="打开仓库，下载 ZIP（或 git clone）"
+          desc="github.com/LGCMcn/translucenttb-26300-fix"
+          delay={10}
+        />
+        <StepCard
+          n={2}
+          title="解压到一个文件夹，不要只解压脚本"
+          desc="需要同目录下的 Test-TaskbarAccent.ps1 / Verify-AfterReboot.ps1"
+          delay={45}
+        />
+        <StepCard
+          n={3}
+          title="右键 Fix-RollbackUpdate.ps1 → 使用 PowerShell 运行（管理员）"
+          desc="脚本会自己提权，窗口别关，卸载要 10–30 分钟"
+          delay={80}
+          highlight
+        />
+        <StepCard
+          n={4}
+          title="重启 → 桌面出现 TBTB-verification.txt"
+          desc="看到 VERDICT: FIXED 就是修好了"
+          delay={115}
+        />
+        <div
+          style={{
+            opacity: s,
+            marginTop: 12,
+            fontSize: 28,
+            color: theme.dim,
+            fontFamily: fontSans,
+          }}
+        >
+          失败就开 <span style={{ color: theme.fg, fontFamily: fontMono }}>Test-TaskbarAccent.ps1</span>{" "}
+          自检，把输出贴到 issue 里
+        </div>
+      </AbsoluteFill>
+    </Backdrop>
+  );
+};
+
 /* ------------------------------------------------------------------ scene 5 */
 
 const TypedCode: React.FC<{ lines: string[]; charsPerFrame?: number }> = ({
@@ -541,32 +655,37 @@ export const TTBFixVideo: React.FC = () => {
       <Sequence from={0} durationInFrames={150} name="Title">
         <SceneTitle />
       </Sequence>
-      <Sequence from={150} durationInFrames={270} name="Symptom">
-        <Fade durationInFrames={270}>
+      <Sequence from={150} durationInFrames={240} name="Symptom">
+        <Fade durationInFrames={240}>
           <SceneSymptom />
         </Fade>
       </Sequence>
-      <Sequence from={420} durationInFrames={330} name="Checks">
-        <Fade durationInFrames={330}>
+      <Sequence from={390} durationInFrames={300} name="Checks">
+        <Fade durationInFrames={300}>
           <SceneChecks />
         </Fade>
       </Sequence>
-      <Sequence from={750} durationInFrames={330} name="RootCause">
-        <Fade durationInFrames={330}>
+      <Sequence from={690} durationInFrames={300} name="RootCause">
+        <Fade durationInFrames={300}>
           <SceneRootCause />
         </Fade>
       </Sequence>
-      <Sequence from={1080} durationInFrames={300} name="Fix">
+      <Sequence from={990} durationInFrames={360} name="Usage">
+        <Fade durationInFrames={360}>
+          <SceneUsage />
+        </Fade>
+      </Sequence>
+      <Sequence from={1350} durationInFrames={300} name="Fix">
         <Fade durationInFrames={300}>
           <SceneFix />
         </Fade>
       </Sequence>
-      <Sequence from={1380} durationInFrames={270} name="Result">
-        <Fade durationInFrames={270}>
+      <Sequence from={1650} durationInFrames={240} name="Result">
+        <Fade durationInFrames={240}>
           <SceneResult />
         </Fade>
       </Sequence>
-      <Sequence from={1650} durationInFrames={150} name="Outro">
+      <Sequence from={1890} durationInFrames={210} name="Outro">
         <SceneOutro />
       </Sequence>
     </AbsoluteFill>
