@@ -6,6 +6,8 @@
 >
 > **English**: After installing KB5132057 (build 26300.10075), TranslucentTB 2026.2.0 stops working entirely — process alive, config correct, `ExplorerTAP.dll` injected, yet the taskbar is never styled. **Rolling back that cumulative update and rebooting fixes it** (verified on the machine).
 
+> **关键词 / Keywords**：Windows 11 26H2 · build 26300.10075 · KB5132057 · 任务栏透明失效 · 任务栏变黑 · 任务栏美化 · TranslucentTB 不生效 · 回滚累积更新 · DISM remove-package · PowerShell 修复脚本 · ExplorerTAP · shell hook · taskbar transparency · taskbar opacity · rollback cumulative update · Windows update broke taskbar
+
 配套视频：`media/ttb-26300-fix.mp4`（1920×1080 / 30fps / **102 秒** / 中文配音 + 声音设计：低频垫音、空气感转场、**Q 弹的 bloop / pop / tick 音效**，含"怎么用"四步演示）· 投稿文案见 [`BILIBILI-POST.md`](BILIBILI-POST.md)
 
 ### 下载 / Downloads
@@ -138,3 +140,18 @@ How the self-test works: temporarily set `desktop_appearance` to opaque magenta,
   Rolling back a cumulative update is system maintenance — back up your data first.
 - 本仓库与 TranslucentTB 官方无关，仅为实测复现与临时解决方案。
   Not affiliated with the TranslucentTB project; this is a reproduction and a stop-gap fix.
+
+## 8. 关键词 / Keywords
+
+**中文检索词 / Chinese search terms**
+
+任务栏不透明 · 任务栏变黑 · 任务栏变灰 · 任务栏透明失效 · 任务栏美化失效 · 任务栏美化软件没反应 · TranslucentTB 不生效 · TranslucentTB 更新后失效 · 更新后任务栏不透明 · Windows 更新后任务栏变回默认 · 26H2 更新踩坑 · KB5132057 问题 · 累积更新回滚 · 卸载更新 · DISM 卸载更新 · 一键修复脚本 · 系统更新翻车 · 任务栏透明教程
+
+**English search terms**
+
+Windows 11 26H2 taskbar bug · taskbar transparency not working after update · TranslucentTB not working Windows 11 · taskbar turned opaque after Windows update · taskbar opacity fix · rollback cumulative update · KB5132057 issue · DISM remove-package · uninstall latest update Windows 11 · ExplorerTAP · shell hook · taskbar appearance provider · PowerShell fix script · Windows 26H2 build 26300.10075
+
+**技术 / Technical**
+
+`Shell_TrayWnd` · `SetWindowCompositionAttribute` · `ExplorerTAP.dll` · `StartupTask` · `Package_for_RollupFix` · `DISM /Remove-Package` · `loudnorm` · Remotion · Ugreen NAS
+
