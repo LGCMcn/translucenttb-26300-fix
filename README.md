@@ -8,6 +8,17 @@
 
 配套视频：`media/ttb-26300-fix.mp4`（1920×1080 / 30fps / **102 秒** / 中文配音 + 声音设计：低频垫音、空气感转场、**Q 弹的 bloop / pop / tick 音效**，含"怎么用"四步演示）· 投稿文案见 [`BILIBILI-POST.md`](BILIBILI-POST.md)
 
+### 下载 / Downloads
+
+| 方式 / Channel | 链接 / Link | 说明 / Notes |
+|---|---|---|
+| GitHub Release | <https://github.com/LGCMcn/translucenttb-26300-fix/releases/latest/download/ttb-26300-fix.mp4> | 视频直链 / direct video |
+| 整包（含脚本）/ bundle | <https://github.com/LGCMcn/translucenttb-26300-fix/archive/refs/heads/main.zip> | 仓库打包 / repo archive |
+| **NAS 分享版 / NAS share** | **<https://ug.link/lgcm/filemgr/share-download/?id=11175170a8fd40aa8a40866852f8b825>** | `TTB-26300修复包-分享版.zip`（12.08 MB）· 有效期至 **2027-12-31** / valid until 2027-12-31 |
+
+> 国内访问 GitHub 慢的话直接用 NAS 分享版，里面已经包含成片、封面、四个脚本和完整说明。
+> If GitHub is slow from mainland China, use the NAS share — it bundles the video, covers, all four scripts and the full write-up.
+
 | 时间 | 内容 | Time | Content |
 |---|---|---|---|
 | 00:00 | 更新后任务栏美化全废 | 00:00 | The update kills your taskbar mod |

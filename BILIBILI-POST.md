@@ -11,6 +11,9 @@
 在线下载（Release 资产）：
 <https://github.com/LGCMcn/translucenttb-26300-fix/releases/latest/download/ttb-26300-fix.mp4>
 
+NAS 分享版（整包 zip，含成片/封面/脚本，有效期至 2027-12-31）：
+<https://ug.link/lgcm/filemgr/share-download/?id=11175170a8fd40aa8a40866852f8b825>
+
 ---
 
 ## 一、标题（选一个）
@@ -37,6 +40,9 @@ dism /online /remove-package /packagename:"Package_for_RollupFix~31bf3856ad364e3
 
 仓库（脚本 + 完整排查报告 + 视频）：
 https://github.com/LGCMcn/translucenttb-26300-fix
+
+备用下载（NAS 直链，国内更快，含成片+封面+脚本，有效期至 2027-12）：
+https://ug.link/lgcm/filemgr/share-download/?id=11175170a8fd40aa8a40866852f8b825
 
 使用方法（视频 00:53 处有四步演示）：
 1) 打开仓库 → Code → Download ZIP，整包解压（别只拖一个脚本出来）
