@@ -6,7 +6,7 @@
 >
 > **English**: After installing KB5132057 (build 26300.10075), TranslucentTB 2026.2.0 stops working entirely — process alive, config correct, `ExplorerTAP.dll` injected, yet the taskbar is never styled. **Rolling back that cumulative update and rebooting fixes it** (verified on the machine).
 
-配套视频：`media/ttb-26300-fix.mp4`（1920×1080 / 30fps / **102 秒** / 中文配音 + 背景音效，含"怎么用"四步演示）· 投稿文案见 [`BILIBILI-POST.md`](BILIBILI-POST.md)
+配套视频：`media/ttb-26300-fix.mp4`（1920×1080 / 30fps / **102 秒** / 中文配音 + 苹果风声音设计：低频垫音、空气感转场、轻点击与玻璃音，含"怎么用"四步演示）· 投稿文案见 [`BILIBILI-POST.md`](BILIBILI-POST.md)
 
 | 时间 | 内容 | Time | Content |
 |---|---|---|---|

@@ -4,3 +4,4 @@ out/
 *.log
 video-silent.mp4
 *.wav
+_video-src.mp4
