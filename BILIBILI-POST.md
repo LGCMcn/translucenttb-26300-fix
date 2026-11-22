@@ -3,10 +3,11 @@
 视频文件：`media/ttb-26300-fix.mp4`
 **1920×1080 / 30fps / 102 秒 / H.264 + AAC / 中文配音 + 声音设计（低频垫音 + 空气感转场 + Q 弹 bloop/pop/tick）**
 
-封面：
-- `media/cover-usage.png` —— "怎么用"四步（推荐，信息量最足）
-- `media/poster.png` —— 标题页
-- `media/cover-verify.png` —— 修复后验证页
+封面（三选一，均为 1920×1080，B 站要求 ≥1146×717、<5MB，全部满足）：
+- `media/cover-a.png` —— **主推**：问题标题 + 修复前/后任务栏对比 + 版本号（红黑，最"避坑"）
+- `media/cover-b.png` —— 备选：一条命令回滚 + 三步操作（黄黑，教程感）
+- `media/cover-c.png` —— 备选：数据版 0 → 114（青蓝，技术感）
+- 旧版参考：`media/cover-usage.png`（"怎么用"四步页）、`media/poster.png`（标题页）
 
 在线下载（Release 资产）：
 <https://github.com/LGCMcn/translucenttb-26300-fix/releases/latest/download/ttb-26300-fix.mp4>
