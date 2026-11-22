@@ -652,40 +652,40 @@ const SceneOutro: React.FC = () => {
 export const TTBFixVideo: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: theme.bg }}>
-      <Sequence from={0} durationInFrames={150} name="Title">
+      <Sequence from={0} durationInFrames={129} name="Title">
         <SceneTitle />
       </Sequence>
-      <Sequence from={150} durationInFrames={240} name="Symptom">
-        <Fade durationInFrames={240}>
+      <Sequence from={129} durationInFrames={456} name="Symptom">
+        <Fade durationInFrames={456}>
           <SceneSymptom />
         </Fade>
       </Sequence>
-      <Sequence from={390} durationInFrames={300} name="Checks">
-        <Fade durationInFrames={300}>
+      <Sequence from={585} durationInFrames={528} name="Checks">
+        <Fade durationInFrames={528}>
           <SceneChecks />
         </Fade>
       </Sequence>
-      <Sequence from={690} durationInFrames={300} name="RootCause">
-        <Fade durationInFrames={300}>
+      <Sequence from={1113} durationInFrames={477} name="RootCause">
+        <Fade durationInFrames={477}>
           <SceneRootCause />
         </Fade>
       </Sequence>
-      <Sequence from={990} durationInFrames={360} name="Usage">
-        <Fade durationInFrames={360}>
+      <Sequence from={1590} durationInFrames={756} name="Usage">
+        <Fade durationInFrames={756}>
           <SceneUsage />
         </Fade>
       </Sequence>
-      <Sequence from={1350} durationInFrames={300} name="Fix">
-        <Fade durationInFrames={300}>
+      <Sequence from={2346} durationInFrames={246} name="Fix">
+        <Fade durationInFrames={246}>
           <SceneFix />
         </Fade>
       </Sequence>
-      <Sequence from={1650} durationInFrames={240} name="Result">
-        <Fade durationInFrames={240}>
+      <Sequence from={2592} durationInFrames={204} name="Result">
+        <Fade durationInFrames={204}>
           <SceneResult />
         </Fade>
       </Sequence>
-      <Sequence from={1890} durationInFrames={210} name="Outro">
+      <Sequence from={2796} durationInFrames={288} name="Outro">
         <SceneOutro />
       </Sequence>
     </AbsoluteFill>

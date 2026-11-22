@@ -8,7 +8,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="TTBFix"
         component={TTBFixVideo}
-        durationInFrames={2100}
+        durationInFrames={3084}
         fps={30}
         width={1920}
         height={1080}

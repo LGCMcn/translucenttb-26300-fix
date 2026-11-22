@@ -2,3 +2,5 @@ node_modules/
 .video-cache/
 out/
 *.log
+video-silent.mp4
+*.wav

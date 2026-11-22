@@ -1,7 +1,15 @@
 # B 站投稿文案（直接复制）
 
-视频文件：`media/ttb-26300-fix.mp4`（1920×1080 / 30fps / 70 秒 / H.264）
-封面：`media/poster.png`（可用 `media/f1150.png` 代替，是"怎么用"那页）
+视频文件：`media/ttb-26300-fix.mp4`
+**1920×1080 / 30fps / 102 秒 / H.264 + AAC / 中文配音 + 背景音效（无 BGM 人声冲突）**
+
+封面：
+- `media/cover-usage.png` —— "怎么用"四步（推荐，信息量最足）
+- `media/poster.png` —— 标题页
+- `media/cover-verify.png` —— 修复后验证页
+
+在线下载（Release 资产）：
+<https://github.com/LGCMcn/translucenttb-26300-fix/releases/latest/download/ttb-26300-fix.mp4>
 
 ---
 
@@ -27,14 +35,14 @@ Windows 26H2（build 26300.10075，KB5132057）更新后，TranslucentTB 直接�
 dism /online /remove-package /packagename:"Package_for_RollupFix~31bf3856ad364e35~amd64~~26100.10075.1.25" /norestart
 重启后自检从 delta=0 变成 delta=114，任务栏恢复透明（26300.9974）
 
-仓库（脚本 + 完整排查报告）：
+仓库（脚本 + 完整排查报告 + 视频）：
 https://github.com/LGCMcn/translucenttb-26300-fix
 
-使用方法：
-1) 下载 ZIP 整包解压
+使用方法（视频 00:53 处有四步演示）：
+1) 打开仓库 → Code → Download ZIP，整包解压（别只拖一个脚本出来）
 2) 右键 Fix-RollbackUpdate.ps1 → 使用 PowerShell 运行（管理员）
-3) 等卸载完 → 重启
-4) 桌面出现 TBTB-verification.txt，看到 VERDICT: FIXED 就好了
+3) 等它卸载完（10–30 分钟，窗口别关）→ 重启
+4) 桌面出现 TBTB-verification.txt，看到 VERDICT: FIXED 就修好了
 
 ⚠️ 卸载系统更新属于维护操作，先备份重要数据；回滚后别急着把这一版更新装回来。
 
@@ -50,21 +58,31 @@ https://github.com/LGCMcn/translucenttb-26300-fix
 
 ```
 00:00 更新后任务栏美化全废
-00:05 症状：进程在、配置对、就是不生效
-00:13 逐项排除：全都正常
-00:23 根因：shell 不再和接管层对话
-00:33 怎么用：四步搞定
-00:45 一键命令
-00:55 修复后验证
-01:03 避坑三件事
+00:04 症状：进程在、配置对、就是不生效
+00:19 逐项排除：全都正常
+00:37 根因：shell 不再和接管层对话
+00:53 怎么用：四步搞定
+01:18 一键命令
+01:26 修复后验证
+01:33 避坑三件事
 ```
 
 ## 五、上传步骤
 
 1. 打开 <https://member.bilibili.com/platform/upload/video/frame>
-2. 上传 `media/ttb-26300-fix.mp4`，封面用 `media/poster.png`
-3. 标题/简介/标签按上面填，分区选"科技 → 计算机技术"
+2. 上传 `media/ttb-26300-fix.mp4`（或从 Release 下载），封面用 `media/cover-usage.png`
+3. 标题 / 简介 / 标签按上面填，分区选"科技 → 计算机技术"
 4. 简介里保留仓库地址（B 站外链不跳转，但可以复制）
-5. 发布后把视频链接回填到 GitHub 仓库 README 和 Release 说明里
+5. 发布后把视频链接回填到 GitHub README 与 Release 说明
 
-> 说明：我没有 B 站账号的登录态，不能替你点发布；视频、封面、文案都已备好，上传即可。
+## 六、素材说明
+
+| 文件 | 用途 |
+|---|---|
+| `media/ttb-26300-fix.mp4` | 成片（带配音音轨） |
+| `media/cover-usage.png` / `poster.png` / `cover-verify.png` | 封面候选 |
+| `media/voice/s1..s8.mp3` | 分段配音（按场景切分，可单独复用） |
+| `media/voice/durations.json` | 每段配音时长，便于二次对齐 |
+| `video/` | Remotion 工程 + 配音/混音脚本（`tts.ps1` / `mix.ps1`），可复现整条流水线 |
+
+> 说明：我没有 B 站账号登录态，不能替你点"发布"；视频、封面、文案、章节都已备好，上传即可。

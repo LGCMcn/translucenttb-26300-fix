@@ -6,7 +6,19 @@
 >
 > **English**: After installing KB5132057 (build 26300.10075), TranslucentTB 2026.2.0 stops working entirely — process alive, config correct, `ExplorerTAP.dll` injected, yet the taskbar is never styled. **Rolling back that cumulative update and rebooting fixes it** (verified on the machine).
 
-配套视频（Remotion 制作，可直接投 B 站）：`media/ttb-26300-fix.mp4` · 投稿文案见 [`BILIBILI-POST.md`](BILIBILI-POST.md)
+配套视频：`media/ttb-26300-fix.mp4`（1920×1080 / 30fps / **102 秒** / 中文配音 + 背景音效，含"怎么用"四步演示）· 投稿文案见 [`BILIBILI-POST.md`](BILIBILI-POST.md)
+
+| 时间 | 内容 | Time | Content |
+|---|---|---|---|
+| 00:00 | 更新后任务栏美化全废 | 00:00 | The update kills your taskbar mod |
+| 00:04 | 症状：进程在、配置对、就是不生效 | 00:04 | Symptom: process alive, config right, no effect |
+| 00:19 | 逐项排除：全都正常 | 00:19 | Rule out everything: all green |
+| 00:37 | 根因：shell 不再和接管层对话 | 00:37 | Root cause: the shell stops talking to the hook layer |
+| **00:53** | **怎么用：四步搞定** | **00:53** | **How to use: 4 steps** |
+| 01:18 | 一键命令 | 01:18 | One-line command |
+| 01:26 | 修复后验证 | 01:26 | Verification after the fix |
+| 01:33 | 避坑三件事 | 01:33 | Three takeaways |
+
 
 ---
 
